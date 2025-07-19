@@ -8,12 +8,17 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🚨 Emergency Department</h1>
-            <p>Crash Footage Dashboard</p>
-            <div class="header-actions">
-                <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
-                <button class="btn btn-success" onclick="exportData()">📊 Export Data</button>
+        <div class="header" style="display: flex; align-items: center; justify-content: space-between; position: relative; min-height: 160px;">
+            <div class="logo-section">
+                <img src="{{ url_for('static', filename='images/angel_eyes_logo.png') }}" alt="Angel Eyes Logo" class="logo-image">
+            </div>
+            <div class="header-center" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; pointer-events: none;">
+                <h1 style="margin-bottom: 10px; pointer-events: auto;">Emergency Department</h1>
+                <p style="pointer-events: auto;">Crash Footage Dashboard</p>
+            </div>
+            <div class="header-actions" style="margin-left: auto; margin-top: 40px; z-index: 2;">
+                <button class="btn btn-primary" onclick="refreshData()">Refresh</button>
+                <button class="btn btn-success" onclick="exportData()">Export Data</button>
             </div>
         </div>
         
@@ -56,9 +61,9 @@
                             </video>
                         </div>
                         <div class="crash-actions">
-                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">📹 View Details</button>
-                            <button class="btn btn-warning" onclick="markUrgent({{ crash.id }})">🚨 Urgent</button>
-                            <button class="btn btn-success" onclick="markReviewed({{ crash.id }})">✅ Reviewed</button>
+                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">View Details</button>
+                            <button class="btn btn-warning" onclick="markUrgent({{ crash.id }})">Urgent</button>
+                            <button class="btn btn-success" onclick="markReviewed({{ crash.id }})">Reviewed</button>
                         </div>
                     </div>
                     {% endfor %}
@@ -90,11 +95,11 @@
             </div>
             
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="downloadVideo()">📥 Download Video</button>
-                <button class="btn btn-warning" onclick="markUrgentModal()">🚨 Mark Urgent</button>
-                <button class="btn btn-success" onclick="markReviewedModal()">✅ Mark Reviewed</button>
-                <button class="btn btn-export" onclick="exportCrashData()">📊 Export Data</button>
-                <button class="btn btn-delete" onclick="deleteCrash()">🗑️ Delete</button>
+                <button class="btn btn-primary" onclick="downloadVideo()">Download Video</button>
+                <button class="btn btn-warning" onclick="markUrgentModal()">Mark Urgent</button>
+                <button class="btn btn-success" onclick="markReviewedModal()">Mark Reviewed</button>
+                <button class="btn btn-export" onclick="exportCrashData()">Export Data</button>
+                <button class="btn btn-delete" onclick="deleteCrash()">Delete</button>
             </div>
         </div>
     </div>

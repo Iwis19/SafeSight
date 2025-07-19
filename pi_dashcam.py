@@ -61,6 +61,22 @@ def save_video_segment():
     print(f"Video saved: {video_filename}")
     return video_filename
 
+# --- Dashcam Movement Detection Logic (for demo/future sensor integration) ---
+def car_is_moving():
+    # Placeholder for real movement detection logic
+    # For example, read from a GPIO pin, accelerometer, or CAN bus
+    # return read_gpio_pin() == HIGH
+    return True  # For demo: always return True
+
+# --- Example usage in main loop (commented out for demo) ---
+# while True:
+#     if car_is_moving():
+#         # Main recording logic here
+#         pass
+#     else:
+#         # Optionally stop/pause recording if car is not moving
+#         pass
+
 print("AngelEye Continuous Recorder Running --> Press Ctrl+C to exit")
 print(f"Recording {BUFFER_SECONDS} seconds of footage, saving every {RECORDING_INTERVAL} seconds")
 print("Note: Sensor-based crash detection is commented out. Uncomment sensor code to enable.")
