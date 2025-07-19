@@ -56,6 +56,8 @@ AngelEye - Python/
 
 ### For Emergency Department Server
 
+#### Option 1: Local SQLite Server
+
 1. **Install dependencies:**
    ```bash
    pip3 install flask flask-cors requests
@@ -63,6 +65,39 @@ AngelEye - Python/
 
 2. **Configure server settings:**
    Edit `config.py` to set your server preferences.
+
+3. **Run the server:**
+   ```bash
+   python3 emergency_server.py
+   ```
+
+#### Option 2: Supabase Cloud Server
+
+1. **Install dependencies:**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+2. **Set up Supabase:**
+   ```bash
+   python3 setup_supabase.py
+   ```
+
+3. **Configure environment variables:**
+   ```bash
+   # Windows
+   set SUPABASE_URL=your-supabase-url
+   set SUPABASE_ANON_KEY=your-supabase-anon-key
+   
+   # Linux/Mac
+   export SUPABASE_URL=your-supabase-url
+   export SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+4. **Run the Supabase server:**
+   ```bash
+   python3 emergency_server_supabase.py
+   ```
 
 ## 🚀 Usage
 
@@ -80,8 +115,14 @@ The system will:
 
 ### Starting the Emergency Department Server
 
+#### Local SQLite Server
 ```bash
 python3 emergency_server.py
+```
+
+#### Supabase Cloud Server
+```bash
+python3 emergency_server_supabase.py
 ```
 
 Access the dashboard at: `http://your-server-ip:5000`
