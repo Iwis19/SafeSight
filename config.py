@@ -2,7 +2,7 @@
 
 # Client Configuration (Raspberry Pi)
 CLIENT_CONFIG = {
-    'server_url': 'http://your-emergency-server.com:5000',  # Change to your server URL
+    'server_url': 'http://10.24.22.66:5000',  # Your laptop's IP address
     'api_key': None,  # Add API key if required
     'upload_retry_attempts': 3,
     'upload_retry_delay': 5,  # seconds

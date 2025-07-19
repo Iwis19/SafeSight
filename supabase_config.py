@@ -3,8 +3,8 @@ from supabase import create_client, Client
 
 # Supabase Configuration
 # You'll need to get these from your Supabase project dashboard
-SUPABASE_URL = os.getenv('SUPABASE_URL', 'your-supabase-url-here')
-SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY', 'your-supabase-anon-key-here')
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://gvpzjcreyzwrumwyvhim.supabase.co')
+SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cHpqY3JleXp3cnVtd3l2aGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4OTY5OTAsImV4cCI6MjA2ODQ3Mjk5MH0.0I0pvNFVccVy4ZmhMU38NcanujWDaexoWh291NnGelA')
 
 # Initialize Supabase client
 def get_supabase_client() -> Client:
