@@ -13,7 +13,7 @@ class CrashUploadService:
         self.upload_queue = []
         self.uploading = False
         self.retry_attempts = 3
-        self.retry_delay = 5  # seconds
+        self.retry_delay = 5  #seconds
         
     def add_crash_video(self, video_path, crash_data=None):
         """Add a crash video to the upload queue"""
@@ -31,46 +31,46 @@ class CrashUploadService:
         self.upload_queue.append(upload_item)
         print(f"Added crash video to upload queue: {video_path}")
         
-        # Start upload process if not already running
+        #upload if not already running
         if not self.uploading:
             self.start_upload_thread()
             
         return True
     
+    #start upload in background thread
     def start_upload_thread(self):
-        """Start upload process in background thread"""
         self.uploading = True
         upload_thread = threading.Thread(target=self._upload_worker, daemon=True)
         upload_thread.start()
     
+    #process queue in the background
     def _upload_worker(self):
-        """Background worker to process upload queue"""
         while self.upload_queue:
             upload_item = self.upload_queue[0]
             
             if self._upload_video(upload_item):
-                # Success - remove from queue
+                #success
                 self.upload_queue.pop(0)
                 print(f"Successfully uploaded: {upload_item['video_path']}")
             else:
-                # Failed - move to end of queue for retry
+                #fail
                 upload_item['attempts'] += 1
                 if upload_item['attempts'] >= self.retry_attempts:
                     print(f"Failed to upload after {self.retry_attempts} attempts: {upload_item['video_path']}")
                     self.upload_queue.pop(0)
                 else:
-                    # Move to end of queue for retry
+                    #retry
                     self.upload_queue.append(self.upload_queue.pop(0))
                     time.sleep(self.retry_delay)
         
         self.uploading = False
     
+    #upload a single vid file
     def _upload_video(self, upload_item):
-        """Upload a single video file"""
         try:
             video_path = upload_item['video_path']
             
-            # Prepare files and data
+            #preps file and data
             files = {
                 'video': ('crash_video.avi', open(video_path, 'rb'), 'video/x-msvideo')
             }
@@ -85,7 +85,7 @@ class CrashUploadService:
             if self.api_key:
                 headers['Authorization'] = f'Bearer {self.api_key}'
             
-            # Upload to server
+            #upload to server
             response = requests.post(
                 f"{self.server_url}/upload_crash",
                 files=files,
@@ -106,10 +106,10 @@ class CrashUploadService:
             print(f"Upload error: {str(e)}")
             return False
     
+    #unique device identifier
     def _get_device_id(self):
-        """Get unique device identifier"""
         try:
-            # Try to get Raspberry Pi serial number
+            #get raspberry pi serial number
             with open('/proc/cpuinfo', 'r') as f:
                 for line in f:
                     if line.startswith('Serial'):
@@ -117,9 +117,8 @@ class CrashUploadService:
         except:
             pass
         
-        # Fallback to hostname
+        #use hostname otherwise
         import socket
         return socket.gethostname()
 
-# Global upload service instance
 upload_service = CrashUploadService() 

@@ -8,10 +8,10 @@ class SupabaseService:
     def __init__(self):
         self.supabase = get_supabase_client()
     
+    #upload crash vids to supabase storage
     def upload_crash_video(self, video_path: str, crash_data: Dict) -> Dict:
-        """Upload crash video to Supabase Storage and save metadata to database"""
         try:
-            # Upload video to Supabase Storage
+            #upload vid
             video_filename = os.path.basename(video_path)
             with open(video_path, 'rb') as video_file:
                 result = self.supabase.storage.from_(VIDEO_BUCKET).upload(
@@ -20,10 +20,10 @@ class SupabaseService:
                     file_options={"content-type": "video/avi"}
                 )
             
-            # Get public URL for the video
+            #get public url
             video_url = self.supabase.storage.from_(VIDEO_BUCKET).get_public_url(video_filename)
             
-            # Save crash metadata to database
+            #metadata 
             crash_record = {
                 'device_id': crash_data.get('device_id', 'unknown'),
                 'timestamp': crash_data.get('timestamp', datetime.now().isoformat()),
@@ -46,8 +46,8 @@ class SupabaseService:
             print(f"Supabase upload error: {str(e)}")
             return {'success': False, 'error': str(e)}
     
+    #get all crashes from db
     def get_crashes(self, limit: int = 100) -> List[Dict]:
-        """Get all crashes from database"""
         try:
             result = self.supabase.table(CRASHES_TABLE)\
                 .select('*')\
@@ -66,8 +66,8 @@ class SupabaseService:
             print(f"Supabase get crashes error: {str(e)}")
             return []
     
+    #update crash status
     def update_crash_status(self, crash_id: int, status: str) -> bool:
-        """Update crash status"""
         try:
             result = self.supabase.table(CRASHES_TABLE)\
                 .update({'status': status})\
@@ -80,15 +80,15 @@ class SupabaseService:
             print(f"Supabase update status error: {str(e)}")
             return False
     
+    #get crash statistics
     def get_crash_stats(self) -> Dict:
-        """Get crash statistics"""
         try:
-            # Get total crashes
+            #ttotal crashes
             total_result = self.supabase.table(CRASHES_TABLE)\
                 .select('id', count='exact')\
                 .execute()
             
-            # Get crashes by status
+            #crashes by status
             new_result = self.supabase.table(CRASHES_TABLE)\
                 .select('id', count='exact')\
                 .eq('status', 'new')\
@@ -115,5 +115,4 @@ class SupabaseService:
             print(f"Supabase stats error: {str(e)}")
             return {'total': 0, 'new': 0, 'urgent': 0, 'reviewed': 0}
 
-# Global Supabase service instance
 supabase_service = SupabaseService() 

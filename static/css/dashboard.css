@@ -1,4 +1,4 @@
-/* Dashboard CSS Styles */
+/*dashboard styling*/
 
 * {
     margin: 0;
@@ -264,9 +264,9 @@ html {
     transform: scale(1.1);
 }
 
-/* Enhanced Dashboard Features */
+/*enhanced dashboard features*/
 
-/* Modal styles */
+/*modal style*/
 .modal {
     display: none;
     position: fixed;
@@ -369,7 +369,6 @@ html {
     color: #fff; 
 }
 
-/* Header actions */
 .header-actions {
     display: flex;
     gap: 10px;
@@ -378,13 +377,11 @@ html {
     justify-content: flex-end;
 }
 
-/* Video container in modal */
 .video-container {
     margin: 20px 0;
     text-align: center;
 }
 
-/* Enhanced button styles */
 .btn-warning {
     background-color: #ff9800;
     color: #000;

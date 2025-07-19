@@ -1,6 +1,6 @@
-# AngelEye Configuration
+#main config
 
-# Client Configuration (Raspberry Pi)
+#client (rasp pi)
 CLIENT_CONFIG = {
     'server_url': 'http://10.24.22.66:5000',  # Your laptop's IP address
     'api_key': None,  # Add API key if required
@@ -11,21 +11,21 @@ CLIENT_CONFIG = {
     'buffer_seconds': 10
 }
 
-# Server Configuration (Emergency Department)
+#server (emergency server)
 SERVER_CONFIG = {
     'host': '0.0.0.0',
     'port': 5000,
     'upload_folder': 'crash_videos',
     'database': 'emergency_crashes.db',
     'allowed_video_extensions': {'avi', 'mp4', 'mov', 'mkv'},
-    'max_file_size': 100 * 1024 * 1024  # 100MB
+    'max_file_size': 100 * 1024 * 1024  #100MB
 }
 
-# Network Configuration
+#network config
 NETWORK_CONFIG = {
-    'timeout': 30,  # seconds
+    'timeout': 30,  #seconds
     'max_connections': 100,
-    'enable_ssl': False,  # Set to True for production
+    'enable_ssl': False,  #true for production
     'ssl_cert': None,
     'ssl_key': None
 } 

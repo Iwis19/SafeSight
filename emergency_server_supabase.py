@@ -8,16 +8,18 @@ app = Flask(__name__, static_folder='static')
 CORS(app)
 
 @app.route('/')
+
+#dashboard with supabase data
 def dashboard():
-    """Emergency department dashboard with Supabase data"""
     crashes = supabase_service.get_crashes()
     return render_template('dashboard.html', crashes=crashes)
 
 @app.route('/upload_crash', methods=['POST'])
+
+#receiive crash vid upload
 def upload_crash():
-    """Receive crash video uploads from AngelEye devices"""
     try:
-        # Check if video file is present
+        #check if video file is present
         if 'video' not in request.files:
             return jsonify({'error': 'No video file provided'}), 400
         
@@ -25,16 +27,16 @@ def upload_crash():
         if video_file.filename == '':
             return jsonify({'error': 'No video file selected'}), 400
         
-        # Save video temporarily
+        #temp save
         temp_video_path = f"temp_{datetime.now().strftime('%Y%m%d_%H%M%S')}.avi"
         video_file.save(temp_video_path)
         
-        # Get additional data
+        #additional data
         timestamp = request.form.get('timestamp', datetime.now().isoformat())
         crash_data = request.form.get('crash_data', '{}')
         device_id = request.form.get('device_id', 'unknown')
         
-        # Prepare crash data
+        #crash data
         crash_info = {
             'device_id': device_id,
             'timestamp': timestamp,
@@ -44,10 +46,10 @@ def upload_crash():
             'buffer_seconds': request.form.get('buffer_seconds', '10')
         }
         
-        # Upload to Supabase
+        #upload to supabase
         result = supabase_service.upload_crash_video(temp_video_path, crash_info)
         
-        # Clean up temporary file
+        # delete temp save
         if os.path.exists(temp_video_path):
             os.remove(temp_video_path)
         
@@ -67,14 +69,16 @@ def upload_crash():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/crashes')
+
+#api endpoint to get all crashes
 def get_crashes():
-    """API endpoint to get all crashes from Supabase"""
     crashes = supabase_service.get_crashes()
     return jsonify(crashes)
 
 @app.route('/api/crash/<int:crash_id>/status', methods=['PUT'])
+
+#update crash status
 def update_crash_status(crash_id):
-    """Update crash status in Supabase"""
     status = request.json.get('status')
     if not status:
         return jsonify({'error': 'Status required'}), 400
@@ -87,8 +91,9 @@ def update_crash_status(crash_id):
         return jsonify({'error': 'Failed to update status'}), 500
 
 @app.route('/api/stats')
+
+#get crash statistics
 def get_stats():
-    """Get crash statistics from Supabase"""
     stats = supabase_service.get_crash_stats()
     return jsonify(stats)
 

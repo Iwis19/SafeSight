@@ -1,4 +1,4 @@
-// Dashboard JavaScript functionality
+//dashboard functionality
 
 function updateStats() {
     const crashes = document.querySelectorAll('.crash-card');
@@ -42,7 +42,7 @@ function refreshData() {
     location.reload();
 }
 
-// Enhanced Dashboard Features
+//enhanced features
 
 let currentCrashId = null;
 let currentCrashData = null;
@@ -55,7 +55,7 @@ function openVideoModal(crashId, videoUrl, crashData) {
     document.getElementById('modal-video').load();
     document.getElementById('modal-title').textContent = `Crash Report #${crashId}`;
     
-    // Populate details
+    //populate details (commented in .html)
     const detailsDiv = document.getElementById('video-details');
     detailsDiv.innerHTML = `
         <div class="detail-row">
@@ -132,7 +132,7 @@ function exportCrashData() {
 
 function deleteCrash() {
     if (currentCrashId && confirm('Are you sure you want to delete this crash report?')) {
-        // Add delete functionality here
+        //add/delete
         alert('Delete functionality would be implemented here');
         closeVideoModal();
     }
@@ -155,7 +155,7 @@ function exportData() {
         });
 }
 
-// Close modal when clicking outside
+//close modal when click outside
 window.onclick = function(event) {
     const modal = document.getElementById('videoModal');
     if (event.target === modal) {
@@ -163,14 +163,14 @@ window.onclick = function(event) {
     }
 }
 
-// Close modal with Escape key
+//close modal with esc
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeVideoModal();
     }
 });
 
-// Auto-refresh every 30 seconds (only if modal is not open)
+//auto refresh if modal is not open every 30s
 setInterval(function() {
     if (!document.getElementById('videoModal').style.display || 
         document.getElementById('videoModal').style.display === 'none') {
@@ -178,7 +178,7 @@ setInterval(function() {
     }
 }, 30000);
 
-// Update stats on page load
+//update stats
 document.addEventListener('DOMContentLoaded', function() {
     updateStats();
 }); 

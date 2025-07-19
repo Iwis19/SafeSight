@@ -9,19 +9,19 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-# Configuration
+#config
 UPLOAD_FOLDER = 'crash_videos'
 ALLOWED_EXTENSIONS = {'avi', 'mp4', 'mov', 'mkv'}
 DATABASE = 'emergency_crashes.db'
 
-# Ensure upload directory exists
+#check upload dir
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+#initialize sql db
 def init_database():
-    """Initialize SQLite database"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
@@ -39,8 +39,9 @@ def init_database():
     conn.close()
 
 @app.route('/')
+
+#emergency server dashboard
 def dashboard():
-    """Emergency department dashboard"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
@@ -54,10 +55,11 @@ def dashboard():
     return render_template('dashboard.html', crashes=crashes)
 
 @app.route('/upload_crash', methods=['POST'])
+
+#receive crash upload from device
 def upload_crash():
-    """Receive crash video uploads from AngelEye devices"""
     try:
-        # Check if video file is present
+        #check if vid is present
         if 'video' not in request.files:
             return jsonify({'error': 'No video file provided'}), 400
         
@@ -68,18 +70,18 @@ def upload_crash():
         if not allowed_file(video_file.filename):
             return jsonify({'error': 'Invalid file type'}), 400
         
-        # Get additional data
+        #additional data
         timestamp = request.form.get('timestamp', datetime.now().isoformat())
         crash_data = request.form.get('crash_data', '{}')
         device_id = request.form.get('device_id', 'unknown')
         
-        # Save video file
+        #save vid file
         filename = f"crash_{device_id}_{timestamp.replace(':', '-')}.avi"
         filename = secure_filename(filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         video_file.save(filepath)
         
-        # Store in database
+        #store
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         cursor.execute('''
@@ -103,13 +105,15 @@ def upload_crash():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/video/<filename>')
+
+#serve vid files
 def serve_video(filename):
-    """Serve video files"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 @app.route('/api/crashes')
+
+#api endpoint to see all crashes
 def get_crashes():
-    """API endpoint to get all crashes"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
@@ -135,8 +139,9 @@ def get_crashes():
     return jsonify(crash_list)
 
 @app.route('/api/crash/<int:crash_id>/status', methods=['PUT'])
+
+#update crash status (reviewed, urgent, etc)
 def update_crash_status(crash_id):
-    """Update crash status (e.g., 'reviewed', 'urgent', etc.)"""
     status = request.json.get('status')
     if not status:
         return jsonify({'error': 'Status required'}), 400
