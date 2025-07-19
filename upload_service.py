@@ -7,7 +7,13 @@ import threading
 from pathlib import Path
 
 class CrashUploadService:
-    def __init__(self, server_url="http://localhost:5000", api_key=None):
+    ###############################################################
+
+    #change digits in http://xxxxxxxxx:5000 to actual IP address
+    #allows the Raspberry Pi to upload videos to your laptop server
+
+    ###############################################################
+    def __init__(self, server_url="http://10.24.22.66:5000", api_key=None):
         self.server_url = server_url
         self.api_key = api_key
         self.upload_queue = []
