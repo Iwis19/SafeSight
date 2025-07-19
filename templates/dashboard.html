@@ -11,6 +11,10 @@
         <div class="header">
             <h1>🚨 Emergency Department</h1>
             <p>Crash Footage Dashboard</p>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+                <button class="btn btn-success" onclick="exportData()">📊 Export Data</button>
+            </div>
         </div>
         
         <div class="stats">
@@ -37,23 +41,24 @@
             <div class="crash-grid" id="crash-grid">
                 {% if crashes %}
                     {% for crash in crashes %}
-                    <div class="crash-card {{ crash[6] }}">
+                    <div class="crash-card {{ crash.status }}">
                         <div class="crash-header">
-                            <div class="crash-title">Crash Report #{{ crash[0] }}</div>
+                            <div class="crash-title">Crash Report #{{ crash.id }}</div>
                             <div class="crash-meta">
-                                Device: {{ crash[1] }} | {{ crash[2] }}
+                                Device: {{ crash.device_id }} | {{ crash.timestamp }}
                             </div>
-                            <span class="crash-status status-{{ crash[6] }}">{{ crash[6] }}</span>
+                            <span class="status-badge status-{{ crash.status }}">{{ crash.status }}</span>
                         </div>
                         <div class="crash-video">
-                            <video controls>
-                                <source src="/video/{{ crash[3] }}" type="video/avi">
+                            <video controls onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">
+                                <source src="{{ url_for('static', filename='crash_videos/' + crash.video_filename) }}" type="video/avi">
                                 Your browser does not support the video tag.
                             </video>
                         </div>
                         <div class="crash-actions">
-                            <button class="btn btn-primary" onclick="markUrgent({{ crash[0] }})">Mark Urgent</button>
-                            <button class="btn btn-success" onclick="markReviewed({{ crash[0] }})">Mark Reviewed</button>
+                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">📹 View Details</button>
+                            <button class="btn btn-warning" onclick="markUrgent({{ crash.id }})">🚨 Urgent</button>
+                            <button class="btn btn-success" onclick="markReviewed({{ crash.id }})">✅ Reviewed</button>
                         </div>
                     </div>
                     {% endfor %}
@@ -67,7 +72,32 @@
         </div>
     </div>
     
-    <button class="refresh-btn" onclick="refreshData()">🔄</button>
+    <!-- Video Detail Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVideoModal()">&times;</span>
+            <h2 id="modal-title">Crash Video Details</h2>
+            
+            <div class="video-container">
+                <video id="modal-video" controls style="width: 100%; max-height: 400px;">
+                    <source id="modal-video-source" src="" type="video/avi">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="video-details" id="video-details">
+                <!-- Details will be populated by JavaScript -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="downloadVideo()">📥 Download Video</button>
+                <button class="btn btn-warning" onclick="markUrgentModal()">🚨 Mark Urgent</button>
+                <button class="btn btn-success" onclick="markReviewedModal()">✅ Mark Reviewed</button>
+                <button class="btn btn-export" onclick="exportCrashData()">📊 Export Data</button>
+                <button class="btn btn-delete" onclick="deleteCrash()">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
     
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>

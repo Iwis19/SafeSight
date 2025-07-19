@@ -11,7 +11,7 @@ CORS(app)
 def dashboard():
     """Emergency department dashboard with Supabase data"""
     crashes = supabase_service.get_crashes()
-    return render_template('dashboard_supabase.html', crashes=crashes)
+    return render_template('dashboard.html', crashes=crashes)
 
 @app.route('/upload_crash', methods=['POST'])
 def upload_crash():

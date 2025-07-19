@@ -10,7 +10,7 @@ import os
 # Constants
 BUFFER_SECONDS = 300  # 5 minutes buffer
 FRAME_RATE = 30
-RECORDING_INTERVAL = 30  # Save video every 30 seconds
+RECORDING_INTERVAL = 15  # Save video every x seconds
 OUTPUT_DIR = "recordings"
 
 # Sensor-based detection constants (uncomment if using sensor)
