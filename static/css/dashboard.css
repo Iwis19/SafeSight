@@ -1,0 +1,230 @@
+/* Dashboard CSS Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 30px;
+    background: #f8f9fa;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #ff6b6b;
+}
+
+.stat-label {
+    color: #666;
+    margin-top: 5px;
+}
+
+.crashes-section {
+    padding: 30px;
+}
+
+.section-title {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.crash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.crash-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.crash-card:hover {
+    transform: translateY(-5px);
+}
+
+.crash-card.urgent {
+    border-left: 5px solid #ff6b6b;
+}
+
+.crash-card.new {
+    border-left: 5px solid #00b894;
+}
+
+.crash-card.reviewed {
+    border-left: 5px solid #74b9ff;
+}
+
+.crash-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.crash-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.crash-meta {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.crash-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-new { background: #00b894; color: white; }
+.status-urgent { background: #ff6b6b; color: white; }
+.status-reviewed { background: #74b9ff; color: white; }
+
+.crash-video {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    position: relative;
+}
+
+.crash-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.crash-actions {
+    padding: 15px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+}
+
+.btn-danger {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #ee5a24;
+}
+
+.btn-success {
+    background: #00b894;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #00a085;
+}
+
+.no-crashes {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+}
+
+.refresh-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.refresh-btn:hover {
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .crash-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header h1 {
+        font-size: 2em;
+    }
+} 
