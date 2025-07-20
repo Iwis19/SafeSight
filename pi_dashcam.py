@@ -12,7 +12,14 @@ import json
 BUFFER_SECONDS = 300  #5 minute buffer time
 FRAME_RATE = 30
 RECORDING_INTERVAL = 15  #save "crash" video every x seconds since we do not have a sensor to properly detect crash
-OUTPUT_DIR = "recordings"
+
+###############################################################
+
+    #change path in "home\pi\recordings" to set video path
+    #all videos are saved in here
+OUTPUT_DIR = r"C:\PROJECTS BUNDLE\Computer Science\AngelEye\crash_videos"
+
+###############################################################
 
 #sensor detection constants
 #ACCEL_THRESHOLD = 20  #change later 
@@ -26,7 +33,7 @@ if not os.path.exists(OUTPUT_DIR):
 cap = cv2.VideoCapture(0)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fcc = cv2.VideoWriter_fourcc(*'XVID')
+fcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 #vid buffer
 frame_buffer = deque(maxlen=BUFFER_SECONDS * FRAME_RATE)
@@ -48,7 +55,7 @@ def save_video_segment():
         return None
     
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    video_filename = os.path.join(OUTPUT_DIR, f"recording_{timestamp}.avi")
+    video_filename = os.path.join(OUTPUT_DIR, f"recording_{timestamp}.mp4")
     
     out = cv2.VideoWriter(video_filename, fcc, FRAME_RATE, (width, height))
     
@@ -311,7 +318,7 @@ try:
                     'detection_type': 'continuous'
                 }
                 upload_service.add_crash_video(video_filename, recording_data)
-                print("Recording uploaded to emergency department")
+                print("Recording uploaded!")
             
             last_save_time = current_time
 

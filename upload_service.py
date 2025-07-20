@@ -9,11 +9,13 @@ from pathlib import Path
 class CrashUploadService:
     ###############################################################
 
-    #change digits in http://xxxxxxxxx:5000 to actual IP address
-    #allows the Raspberry Pi to upload videos to your laptop server
+    #change 'x's in http://xxxxxxxxx:5000 to separate device's IP address
+    #allows the Raspberry Pi to upload videos to laptop server
+    #must be connected to same network!
+    def __init__(self, server_url="http://172.20.10.3:5000", api_key=None):
 
     ###############################################################
-    def __init__(self, server_url="http://10.24.22.66:5000", api_key=None):
+    
         self.server_url = server_url
         self.api_key = api_key
         self.upload_queue = []
@@ -21,8 +23,8 @@ class CrashUploadService:
         self.retry_attempts = 3
         self.retry_delay = 5  #seconds
         
+        
     def add_crash_video(self, video_path, crash_data=None):
-        """Add a crash video to the upload queue"""
         if not os.path.exists(video_path):
             print(f"Error: Video file not found: {video_path}")
             return False

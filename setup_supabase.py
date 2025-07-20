@@ -131,7 +131,7 @@ def main():
     print("\n🎉 Setup complete!")
     print("Your AngelEye project is ready to use with Supabase!")
     print("\nTo run with Supabase:")
-    print("python3 emergency_server_supabase.py")
+    print("python3 insurance_server.py")
 
 if __name__ == "__main__":
     main() 
