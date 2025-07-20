@@ -71,28 +71,125 @@ def car_is_moving():
 #recording logic paired w/ the method above
 #while True:
 #    if car_is_moving():
-#        # Main recording logic here
+#        #main recording logic goes here
 #        pass
 #    else:
-#        # Optionally stop/pause recording if car is not moving
+#        #stop recording when car stops moving for a long period of time (>= 5mins?)
 #        pass
 
-#collects driving data for urban planners
-def collect_driving_data():
+
+#driver's data collection & storage
+
+#from business_supabase_service import business_supabase_service  #separate Supabase for business data
+#def init_driver_database():
+#    try:
+#        result = business_supabase_service.create_drivers_table()
+#        if result['success']:
+#            print("Driver database initialized in business Supabase")
+#        else:
+#            print(f"Failed to initialize driver database: {result['error']}")
+#    except Exception as e:
+#        print(f"Database initialization error: {str(e)}")
+#
+#get existing driver or create new driver profile
+#def get_or_create_driver(driver_id):
+#    try:
+#        driver = business_supabase_service.get_driver(driver_id)
+#         
+#        if not driver:
+#            new_driver = {
+#                'driver_id': driver_id,
+#                'created_at': datetime.now().isoformat(),
+#                'total_trips': 0,
+#                'total_driving_time': 0,
+#                'event_history': {
+#                    'sudden_acceleration_count': 0,
+#                    'sudden_braking_count': 0,
+#                    'sharp_turn_count': 0
+#                }
+#            }
+#             
+#            result = business_supabase_service.create_driver(new_driver)
+#            if result['success']:
+#                print(f"Created new driver profile in business Supabase: {driver_id}")
+#                return result['driver']
+#            else:
+#                print(f"Failed to create driver: {result['error']}")
+#                return None
+#         
+#        return driver
+#         
+#    except Exception as e:
+#        print(f"Error accessing driver database: {str(e)}")
+#        return None
+#
+#save driving data to driver profiles
+#def save_driver_data(driver_id, driving_data):
+#    try:
+#        session_data = {
+#            'driver_id': driver_id,
+#            'timestamp': driving_data['timestamp'],
+#            'events': {
+#                'sudden_acceleration_count': driving_data['sudden_acceleration_count'],
+#                'sudden_braking_count': driving_data['sudden_braking_count'],
+#                'sharp_turn_count': driving_data['sharp_turn_count']
+#            }
+#        }
+#         
+#        result = business_supabase_service.save_driving_session(session_data)
+#         
+#        if result['success']:
+#            print(f"Saved driving data to business Supabase for driver: {driver_id}")
+#            return True
+#        else:
+#            print(f"Failed to save driver data: {result['error']}")
+#            return False
+#         
+#    except Exception as e:
+#        print(f"Error saving driver data: {str(e)}")
+#        return False
+#
+#retrieve driver stats
+#def get_driver_stats(driver_id):
+#    try:    
+#        result = business_supabase_service.get_driver_stats(driver_id)
+#         
+#        if result['success']:
+#            return result['stats']
+#        else:
+#            print(f"Failed to get driver stats: {result['error']}")
+#            return None
+#         
+#    except Exception as e:
+#        print(f"Error getting driver stats: {str(e)}")
+#        return None
+
+#driver data collection (not in use due to missing sensor)
+def collect_driving_data(driver_id="demo_driver_001"):
     data = {
-        #the following values are all placeholders for sensor
         'timestamp': datetime.now().isoformat(),
-        'sudden_acceleration_count': 0,  
-        'sudden_braking_count': 0,       
-        'sharp_turn_count': 0,           
+        'driver_id': driver_id,
+        'sudden_acceleration_count': 0,  #placeholder: count detected events in interval
+        'sudden_braking_count': 0,       #placeholder
+        'sharp_turn_count': 0,           #placeholder
         'note': 'No sensor connected, using placeholder values.'
     }
+    
+    #save to business supabase 
+    #init_driver_database()
+    #save_driver_data(driver_id, data)
+    return data
 
-    #output
-    filename = f"driving_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=2)
-    print(f"Driving data saved: {filename}")
+
+###############################################
+
+#example use in main loop
+# init_driver_database() 
+# driving_data = collect_driving_data("driver_001")  #use real driver id here
+
+###############################################
+
+
 
 #local storage (on cam, but since raspberry pi, this part is not functional)
 
@@ -154,11 +251,17 @@ def collect_driving_data():
 #    except Exception as e:
 #        print(f"Local cleanup failed: {str(e)}")
 #
-##example usage in main loop 
-#setup_local_storage()  # Call this once at startup
-# 
+
+
+###############################################
+
+#example usage in main loop 
+#setup_local_storage()  
 #if video_filename:
 #    upload_service.add_crash_video(video_filename, recording_data)
+
+###############################################
+
 
 print("AngelEye is recording --> Press Ctrl+C to exit")
 print(f"Recording {BUFFER_SECONDS} seconds of footage, saving every {RECORDING_INTERVAL} seconds")

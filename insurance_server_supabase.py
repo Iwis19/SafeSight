@@ -8,15 +8,14 @@ app = Flask(__name__, static_folder='static')
 CORS(app)
 
 @app.route('/')
-
-#dashboard with supabase data
 def dashboard():
+    """Insurance company dashboard with Supabase data"""
     crashes = supabase_service.get_crashes()
     return render_template('dashboard.html', crashes=crashes)
 
 @app.route('/upload_crash', methods=['POST'])
 
-#receiive crash vid upload
+#receive crash videos from angeleye dev for insurance claims
 def upload_crash():
     try:
         #check if video file is present
@@ -27,16 +26,16 @@ def upload_crash():
         if video_file.filename == '':
             return jsonify({'error': 'No video file selected'}), 400
         
-        #temp save
+        #save video temporarily
         temp_video_path = f"temp_{datetime.now().strftime('%Y%m%d_%H%M%S')}.avi"
         video_file.save(temp_video_path)
         
-        #additional data
+        #get additional data
         timestamp = request.form.get('timestamp', datetime.now().isoformat())
         crash_data = request.form.get('crash_data', '{}')
         device_id = request.form.get('device_id', 'unknown')
         
-        #crash data
+        #prepare crash data
         crash_info = {
             'device_id': device_id,
             'timestamp': timestamp,
@@ -46,18 +45,18 @@ def upload_crash():
             'buffer_seconds': request.form.get('buffer_seconds', '10')
         }
         
-        #upload to supabase
+        #upload to Supabase
         result = supabase_service.upload_crash_video(temp_video_path, crash_info)
         
-        # delete temp save
+        #clean up temporary file
         if os.path.exists(temp_video_path):
             os.remove(temp_video_path)
         
         if result['success']:
-            print(f"Crash video uploaded to Supabase: {result['crash_id']}")
+            print(f"Crash video uploaded to Supabase for insurance claim: {result['crash_id']}")
             return jsonify({
                 'success': True,
-                'message': 'Crash video uploaded successfully',
+                'message': 'Crash video uploaded successfully for insurance processing',
                 'crash_id': result['crash_id'],
                 'video_url': result['video_url']
             })
@@ -98,7 +97,7 @@ def get_stats():
     return jsonify(stats)
 
 if __name__ == '__main__':
-    print("Emergency Department Server (Supabase) Starting...")
+    print("Insurance Company Server (Supabase) Starting...")
     print("Dashboard available at: http://localhost:5000")
     print("Make sure to set your Supabase credentials in environment variables!")
     app.run(host='0.0.0.0', port=5000, debug=True) 
