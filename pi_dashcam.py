@@ -94,6 +94,72 @@ def collect_driving_data():
         json.dump(data, f, indent=2)
     print(f"Driving data saved: {filename}")
 
+#local storage (on cam, but since raspberry pi, this part is not functional)
+
+#LOCAL_STORAGE_DIR = "/home/pi/dashcam_videos"  #local storage directory
+#MAX_LOCAL_STORAGE_GB = 10  #maximum local storage in GB
+#
+#def setup_local_storage():
+#    if not os.path.exists(LOCAL_STORAGE_DIR):
+#        os.makedirs(LOCAL_STORAGE_DIR)
+#        print(f"Created local storage directory: {LOCAL_STORAGE_DIR}")
+# 
+#def save_video_locally(video_path, crash_info):
+#    try:
+#        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+#        local_filename = f"backup_{timestamp}_{crash_info.get('device_id', 'unknown')}.avi"
+#        local_path = os.path.join(LOCAL_STORAGE_DIR, local_filename)
+#        
+#        import shutil
+#        shutil.copy2(video_path, local_path)
+#        print(f"Video backed up locally: {local_path}")
+#         
+#        #clean up old files
+#         cleanup_old_local_videos()
+#         
+#     except Exception as e:
+#         print(f"Local backup failed: {str(e)}")
+# 
+##delete old video 
+#def cleanup_old_local_videos():
+#    try:
+#        # Calculate current storage usage
+#        total_size = 0
+#        video_files = []
+#         
+#        for filename in os.listdir(LOCAL_STORAGE_DIR):
+#            if filename.endswith('.avi'):
+#                filepath = os.path.join(LOCAL_STORAGE_DIR, filename)
+#                file_size = os.path.getsize(filepath)
+#                total_size += file_size
+#                video_files.append((filepath, os.path.getmtime(filepath)))
+#         
+#        #convert to GB
+#        total_size_gb = total_size / (1024**3)
+#         
+#        #if storage > 80% full, delete oldest files
+#        if total_size_gb > (MAX_LOCAL_STORAGE_GB * 0.8):
+#            video_files.sort(key=lambda x: x[1])
+#             
+#            #delete oldest files until under 50% capacity
+#            for filepath, _ in video_files:
+#                if total_size_gb <= (MAX_LOCAL_STORAGE_GB * 0.5):
+#                    break
+#                 
+#                file_size = os.path.getsize(filepath)
+#                os.remove(filepath)
+#                total_size_gb -= file_size / (1024**3)
+#                print(f"Deleted old backup: {filepath}")
+#                 
+#    except Exception as e:
+#        print(f"Local cleanup failed: {str(e)}")
+#
+##example usage in main loop 
+#setup_local_storage()  # Call this once at startup
+# 
+#if video_filename:
+#    upload_service.add_crash_video(video_filename, recording_data)
+
 print("AngelEye is recording --> Press Ctrl+C to exit")
 print(f"Recording {BUFFER_SECONDS} seconds of footage, saving every {RECORDING_INTERVAL} seconds")
 
