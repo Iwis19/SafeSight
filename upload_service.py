@@ -80,7 +80,7 @@ class CrashUploadService:
             
             #preps file and data
             files = {
-                'video': ('crash_video.avi', open(video_path, 'rb'), 'video/x-msvideo')
+                'video': ('crash_video.mp4', open(video_path, 'rb'), 'video/mp4')
             }
             
             data = {

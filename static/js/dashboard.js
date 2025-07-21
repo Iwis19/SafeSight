@@ -42,29 +42,104 @@ function refreshData() {
     location.reload();
 }
 
+function clearAllCrashes() {
+    console.log('clearAllCrashes function called');
+    if (confirm('Are you sure you want to delete ALL crash reports? This action cannot be undone.')) {
+        console.log('User confirmed, making API call...');
+        fetch('/api/clear-all-crashes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert('All crashes cleared successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to clear crashes'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error clearing crashes. Please try again.');
+        });
+    }
+}
+
+
 //enhanced features
 
 let currentCrashId = null;
 let currentCrashData = null;
 
-function openVideoModal(crashId, videoUrl, crashData) {
+function openVideoModal(crashId, videoUrl) {
+    console.log('openVideoModal called with:', { crashId, videoUrl });
     currentCrashId = crashId;
-    currentCrashData = crashData;
     
-    document.getElementById('modal-video-source').src = videoUrl;
+    // Use the proxy URL to avoid CORS issues
+    const fullVideoUrl = `/video/${videoUrl}`;
+    console.log('Setting video source to:', fullVideoUrl);
+    document.getElementById('modal-video-source').src = fullVideoUrl;
     document.getElementById('modal-video').load();
     document.getElementById('modal-title').textContent = `Crash Report #${crashId}`;
     
-    //populate details (commented in .html)
+    // Fetch crash data from server
+    fetch(`/api/crashes`)
+        .then(response => response.json())
+        .then(crashes => {
+            const crashData = crashes.find(crash => crash.id === crashId);
+            if (crashData) {
+                currentCrashData = crashData;
+                populateModalDetails(crashData);
+            } else {
+                console.error('Crash data not found for ID:', crashId);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching crash data:', error);
+        });
+    
+    document.getElementById('videoModal').style.display = 'block';
+}
+
+function populateModalDetails(crashData) {
+    console.log('Populating modal details with:', crashData);
     const detailsDiv = document.getElementById('video-details');
+    
+    // Format crash data nicely
+    let crashDataHtml = '';
+    if (crashData.crash_data && typeof crashData.crash_data === 'object') {
+        const crashInfo = crashData.crash_data;
+        crashDataHtml = `
+            <div class="detail-row">
+                <span class="detail-label">Recording Interval:</span>
+                <span class="detail-value">${crashInfo.recording_interval || 'N/A'} seconds</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Buffer Seconds:</span>
+                <span class="detail-value">${crashInfo.buffer_seconds || 'N/A'} seconds</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Frame Rate:</span>
+                <span class="detail-value">${crashInfo.frame_rate || 'N/A'} fps</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Detection Type:</span>
+                <span class="detail-value">${crashInfo.detection_type || 'N/A'}</span>
+            </div>
+        `;
+    }
+    
     detailsDiv.innerHTML = `
         <div class="detail-row">
             <span class="detail-label">Device ID:</span>
             <span class="detail-value">${crashData.device_id || 'Unknown'}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Timestamp:</span>
-            <span class="detail-value">${new Date(crashData.timestamp).toLocaleString()}</span>
         </div>
         <div class="detail-row">
             <span class="detail-label">Status:</span>
@@ -77,20 +152,18 @@ function openVideoModal(crashId, videoUrl, crashData) {
             <span class="detail-value">${new Date(crashData.created_at).toLocaleString()}</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Video URL:</span>
-            <span class="detail-value">${crashData.video_url || crashData.video_filename || 'N/A'}</span>
+            <span class="detail-label">Video Filename:</span>
+            <span class="detail-value">${crashData.video_filename || 'N/A'}</span>
         </div>
-        <div class="detail-row">
-            <span class="detail-label">Crash Data:</span>
-            <span class="detail-value">${JSON.stringify(crashData.crash_data || {}, null, 2)}</span>
-        </div>
+        ${crashDataHtml}
     `;
-    
-    document.getElementById('videoModal').style.display = 'block';
 }
 
 function closeVideoModal() {
-    document.getElementById('videoModal').style.display = 'none';
+    console.log('closeVideoModal called');
+    const modal = document.getElementById('videoModal');
+    console.log('Modal element:', modal);
+    modal.style.display = 'none';
     currentCrashId = null;
     currentCrashData = null;
 }
@@ -132,9 +205,26 @@ function exportCrashData() {
 
 function deleteCrash() {
     if (currentCrashId && confirm('Are you sure you want to delete this crash report?')) {
-        //add/delete
-        alert('Delete functionality would be implemented here');
-        closeVideoModal();
+        fetch(`/api/crash/${currentCrashId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Crash deleted successfully!');
+                closeVideoModal();
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to delete crash'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting crash. Please try again.');
+        });
     }
 }
 
@@ -181,4 +271,19 @@ setInterval(function() {
 //update stats
 document.addEventListener('DOMContentLoaded', function() {
     updateStats();
+    
+    // Test video URLs to see if they're accessible
+    const videos = document.querySelectorAll('video source');
+    videos.forEach((source, index) => {
+        const url = source.src;
+        console.log(`Testing video ${index + 1}: ${url}`);
+        
+        fetch(url, { method: 'HEAD' })
+            .then(response => {
+                console.log(`Video ${index + 1} response:`, response.status, response.headers.get('content-type'));
+            })
+            .catch(error => {
+                console.error(`Video ${index + 1} fetch error:`, error);
+            });
+    });
 }); 

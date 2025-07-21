@@ -279,7 +279,7 @@ html {
 }
 
 .modal-content {
-    background-color: #1a1a1a;
+    background-color: #FFFFFF;
     margin: 5% auto;
     padding: 20px;
     border-radius: 10px;
@@ -287,6 +287,7 @@ html {
     max-width: 800px;
     max-height: 80vh;
     overflow-y: auto;
+    color: #222831;
 }
 
 .close {
@@ -310,17 +311,18 @@ html {
     justify-content: space-between;
     margin: 10px 0;
     padding: 10px;
-    background-color: #2a2a2a;
+    background-color: #F7F9FB;
     border-radius: 5px;
+    border: 1px solid #eee;
 }
 
 .detail-label {
     font-weight: bold;
-    color: #4CAF50;
+    color: #234E70;
 }
 
 .detail-value {
-    color: #fff;
+    color: #222831;
 }
 
 .action-buttons {

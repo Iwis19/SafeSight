@@ -95,7 +95,7 @@ SUPABASE_ANON_KEY=your-anon-key-here
 
 3. **Test connection**:
    ```bash
-   python -c "from supabase_service import supabase_service; print('Supabase connected!')"
+   python -c "from dbservice import supabase_service; print('Supabase connected!')"
    ```
 
 ## 🚀 Step 8: Run Supabase Server

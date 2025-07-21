@@ -6,7 +6,7 @@ This script helps you configure Supabase for the AngelEye project.
 
 import os
 import sys
-from supabase_config import get_supabase_client
+from dbconfig import get_supabase_client
 
 def setup_environment():
     """Setup environment variables for Supabase"""

@@ -5,13 +5,16 @@ from collections import deque
 import numpy as np
 from datetime import datetime
 from upload_service import upload_service
+from video_recorder import VideoRecorder
 import os
 import json
+import select
+import sys
 
 # Constants
 BUFFER_SECONDS = 300  #5 minute buffer time
-FRAME_RATE = 30
-RECORDING_INTERVAL = 15  #save "crash" video every x seconds since we do not have a sensor to properly detect crash
+FRAME_RATE = 10
+RECORDING_INTERVAL = 30  #save "crash" video every x seconds since we do not have a sensor to properly detect crash
 
 ###############################################################
 
@@ -31,9 +34,12 @@ if not os.path.exists(OUTPUT_DIR):
 
 #cam
 cap = cv2.VideoCapture(0)
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fcc = cv2.VideoWriter_fourcc(*'mp4v')
+width = 640
+height = 480
+
+# Initialize video recorder with MoviePy
+video_recorder = VideoRecorder(OUTPUT_DIR, width, height, FRAME_RATE)
+print("Using MoviePy with H.264 codec for MP4 format")
 
 #vid buffer
 frame_buffer = deque(maxlen=BUFFER_SECONDS * FRAME_RATE)
@@ -43,29 +49,27 @@ frame_buffer = deque(maxlen=BUFFER_SECONDS * FRAME_RATE)
 
 #no sensor :(
 def detect_crash_sensor():
-    # accel = sensor.get_accel_data()
-    # total_accel = np.sqrt(accel['x']**2 + accel['y']**2 + accel['z']**2)
-    # return total_accel > ACCEL_THRESHOLD
+    #accel = sensor.get_accel_data()
+    #total_accel = np.sqrt(accel['x']**2 + accel['y']**2 + accel['z']**2)
+    #return total_accel > ACCEL_THRESHOLD
     return False  
 
 #saving video
 def save_video_segment():
-    
     if len(frame_buffer) == 0:
         return None
+
+    print("Saving video using MoviePy with H.264 codec...")
+    # Convert deque to list for MoviePy
+    frames_list = list(frame_buffer)
+    video_path = video_recorder.save_video_from_frames(frames_list)
     
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    video_filename = os.path.join(OUTPUT_DIR, f"recording_{timestamp}.mp4")
-    
-    out = cv2.VideoWriter(video_filename, fcc, FRAME_RATE, (width, height))
-    
-    #write frames from buffer
-    for frame in frame_buffer:
-        out.write(frame)
-    
-    out.release()
-    print(f"Video saved: {video_filename}")
-    return video_filename
+    if video_path:
+        print(f"Video saved: {video_path}")
+        return video_path
+    else:
+        print("Failed to save video")
+        return None
 
 #dashcam movement detection logic w/sensor 
 def car_is_moving():
@@ -271,12 +275,11 @@ def collect_driving_data(driver_id="demo_driver_001"):
 
 
 print("AngelEye is recording --> Press Ctrl+C to exit")
-print(f"Recording {BUFFER_SECONDS} seconds of footage, saving every {RECORDING_INTERVAL} seconds")
+print(f"Recording {BUFFER_SECONDS/60.0} minutes of footage, saving every {RECORDING_INTERVAL} seconds")
 
 #big main recording loop
 try:
     last_save_time = time.time()
-    
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -285,31 +288,12 @@ try:
 
         #buffer
         frame_buffer.append(frame)
-        
-        #video saving using sensor based detection 
-        #if detect_crash_sensor():
-        #    print("Crash Detected! --> Saving video!")
-        #    video_filename = save_video_segment()
-        #    if video_filename:
-        #        crash_data = {
-        #            'acceleration_threshold': ACCEL_THRESHOLD,
-        #            'frame_rate': FRAME_RATE,
-        #            'buffer_seconds': BUFFER_SECONDS,
-        #            'detection_type': 'sensor'
-        #        }
-        #        upload_service.add_crash_video(video_filename, crash_data)
-        #        print("Crash video uploaded to emergency department!")
-        #    frame_buffer.clear()
-        #    continue
-        
+
         current_time = time.time()
-        
-        #save video every x seconds for continuous recording
+        #save video every RECORDING_INTERVAL seconds
         if current_time - last_save_time >= RECORDING_INTERVAL:
             video_filename = save_video_segment()
-            
             if video_filename:
-                #uploading to emergency server
                 recording_data = {
                     'recording_interval': RECORDING_INTERVAL,
                     'buffer_seconds': BUFFER_SECONDS,
@@ -317,19 +301,20 @@ try:
                     'timestamp': datetime.now().isoformat(),
                     'detection_type': 'continuous'
                 }
-                upload_service.add_crash_video(video_filename, recording_data)
-                print("Recording uploaded!")
-            
+                success = upload_service.add_crash_video(video_filename, recording_data)
+                if success:
+                    print("Recording uploaded!")
+                else:
+                    print("Failed to upload recording.")
             last_save_time = current_time
 
-        #small delay
-        time.sleep(1.0/FRAME_RATE)
+        #delay to maintain frame rate
+        time.sleep(1.0 / FRAME_RATE)
 
 except KeyboardInterrupt:
-    print("\nExiting, saving final recording")
+    print("\nExiting - saving final recording...")
     save_video_segment()
 
 finally:
     cap.release()
-    cv2.destroyAllWindows()
     print("Recording stopped")

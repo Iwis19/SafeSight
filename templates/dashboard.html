@@ -13,11 +13,11 @@
                 <img src="{{ url_for('static', filename='images/angel_eyes_logo.png') }}" alt="Angel Eyes Logo" class="logo-image">
             </div>
             <div class="header-center" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%; pointer-events: none;">
-                <h1 style="margin-bottom: 10px; pointer-events: auto;">Insurance Company</h1>
-                <p style="pointer-events: auto;">Crash Footage Dashboard</p>
+                <h1 style="margin-bottom: 10px; pointer-events: auto;">Dashboard</h1>
             </div>
             <div class="header-actions" style="margin-left: auto; margin-top: 40px; z-index: 2;">
                 <button class="btn btn-primary" onclick="refreshData()">Refresh</button>
+                <button class="btn btn-danger" onclick="clearAllCrashes()" style="margin-left: 10px;">Clear All</button>
             </div>
         </div>
         
@@ -54,13 +54,16 @@
                             <span class="status-badge status-{{ crash.status }}">{{ crash.status }}</span>
                         </div>
                         <div class="crash-video">
-                            <video controls onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">
-                                <source src="{{ url_for('static', filename='crash_videos/' + crash.video_filename) }}" type="video/avi">
+                            <video controls onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})" 
+                                   onerror="console.error('Video error for {{ crash.video_filename }}:', this.error);"
+                                   onloadstart="console.log('Loading video: {{ crash.video_filename }}');"
+                                   oncanplay="console.log('Video can play: {{ crash.video_filename }}');">
+                                <source src="{{ url_for('proxy_video', filename=crash.video_filename) }}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                         </div>
                         <div class="crash-actions">
-                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})">View Details</button>
+                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}')">View Details</button>
                             <button class="btn btn-warning" onclick="markUrgent({{ crash.id }})">Urgent</button>
                             <button class="btn btn-success" onclick="markReviewed({{ crash.id }})">Reviewed</button>
                         </div>
@@ -84,7 +87,7 @@
             
             <div class="video-container">
                 <video id="modal-video" controls style="width: 100%; max-height: 400px;">
-                    <source id="modal-video-source" src="" type="video/avi">
+                    <source id="modal-video-source" src="" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
