@@ -7,6 +7,8 @@ import time
 from datetime import datetime
 from typing import List, Optional
 
+#utility for video file creation, not for actual saving
+#encodes frames into a video file
 class VideoRecorder:
     def __init__(self, output_dir: str, width: int = 640, height: int = 480, fps: int = 10):
         self.output_dir = output_dir

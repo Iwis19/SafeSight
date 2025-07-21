@@ -12,7 +12,7 @@ class CrashUploadService:
     #change 'x's in http://xxxxxxxxx:5000 to separate device's IP address
     #allows the Raspberry Pi to upload videos to laptop server
     #must be connected to same network!
-    def __init__(self, server_url="http://172.20.10.3:5000", api_key=None):
+    def __init__(self, server_url="http://localhost:5000", api_key=None):
 
     ###############################################################
     

@@ -126,6 +126,10 @@ function populateModalDetails(crashData) {
 
     detailsDiv.innerHTML = `
         <div class="detail-row">
+            <span class="detail-label">Driver ID:</span>
+            <span class="detail-value">${crashData.crash_data && crashData.crash_data.driver_id ? crashData.crash_data.driver_id : 'N/A'}</span>
+        </div>
+        <div class="detail-row">
             <span class="detail-label">Device ID:</span>
             <span class="detail-value">${crashData.device_id || 'N/A'}</span>
         </div>

@@ -14,12 +14,12 @@ import sys
 #const
 BUFFER_SECONDS = 300  #5 minute buffer time
 FRAME_RATE = 10
-RECORDING_INTERVAL = 30  #save "crash" video every x seconds since we do not have a sensor to properly detect crash
+RECORDING_INTERVAL = 30  #save "crash" video every x seconds to mimic crash
 
 ###############################################################
 
-    #change path in "home\pi\recordings" to set video path
-    #all videos are saved in here
+    #change path in "home\pi\recordings" to set video path on the actual dashcam product
+    #all videos are saved in here (locally)
 OUTPUT_DIR = r"C:\PROJECTS BUNDLE\Computer Science\AngelEye\crash_videos"
 
 ###############################################################
@@ -37,7 +37,7 @@ cap = cv2.VideoCapture(0)
 width = 640
 height = 480
 
-# Initialize video recorder with MoviePy
+#initialize video recorder with MoviePy
 video_recorder = VideoRecorder(OUTPUT_DIR, width, height, FRAME_RATE)
 print("Using MoviePy with H.264 codec for MP4 format")
 
@@ -60,7 +60,7 @@ def save_video_segment():
         return None
 
     print("Saving video using MoviePy with H.264 codec...")
-    # Convert deque to list for MoviePy
+    #convert deque to list for MoviePy
     frames_list = list(frame_buffer)
     video_path = video_recorder.save_video_from_frames(frames_list)
     
@@ -89,107 +89,105 @@ def car_is_moving():
 #        pass
 
 
-#driver's data collection & storage
+###############################################
+#COLLECTING URBAN PLANNING ANALYSIS DATA (FOR OURSELVES)
+def init_driver_database():
+    try:
+        result = business_supabase_service.create_drivers_table()
+        if result['success']:
+            print("Driver database initialized in business Supabase")
+        else:
+            print(f"Failed to initialize driver database: {result['error']}")
+    except Exception as e:
+        print(f"Database initialization error: {str(e)}")
 
-#from business_supabase_service import business_supabase_service  #separate Supabase for business data
-#def init_driver_database():
-#    try:
-#        result = business_supabase_service.create_drivers_table()
-#        if result['success']:
-#            print("Driver database initialized in business Supabase")
-#        else:
-#            print(f"Failed to initialize driver database: {result['error']}")
-#    except Exception as e:
-#        print(f"Database initialization error: {str(e)}")
-#
-#get existing driver or create new driver profile
-#def get_or_create_driver(driver_id):
-#    try:
-#        driver = business_supabase_service.get_driver(driver_id)
-#         
-#        if not driver:
-#            new_driver = {
-#                'driver_id': driver_id,
-#                'created_at': datetime.now().isoformat(),
-#                'total_trips': 0,
-#                'total_driving_time': 0,
-#                'event_history': {
-#                    'sudden_acceleration_count': 0,
-#                    'sudden_braking_count': 0,
-#                    'sharp_turn_count': 0
-#                }
-#            }
-#             
-#            result = business_supabase_service.create_driver(new_driver)
-#            if result['success']:
-#                print(f"Created new driver profile in business Supabase: {driver_id}")
-#                return result['driver']
-#            else:
-#                print(f"Failed to create driver: {result['error']}")
-#                return None
-#         
-#        return driver
-#         
-#    except Exception as e:
-#        print(f"Error accessing driver database: {str(e)}")
-#        return None
-#
-#save driving data to driver profiles
-#def save_driver_data(driver_id, driving_data):
-#    try:
-#        session_data = {
-#            'driver_id': driver_id,
-#            'timestamp': driving_data['timestamp'],
-#            'events': {
-#                'sudden_acceleration_count': driving_data['sudden_acceleration_count'],
-#                'sudden_braking_count': driving_data['sudden_braking_count'],
-#                'sharp_turn_count': driving_data['sharp_turn_count']
-#            }
-#        }
-#         
-#        result = business_supabase_service.save_driving_session(session_data)
-#         
-#        if result['success']:
-#            print(f"Saved driving data to business Supabase for driver: {driver_id}")
-#            return True
-#        else:
-#            print(f"Failed to save driver data: {result['error']}")
-#            return False
-#         
-#    except Exception as e:
-#        print(f"Error saving driver data: {str(e)}")
-#        return False
-#
-#retrieve driver stats
-#def get_driver_stats(driver_id):
-#    try:    
-#        result = business_supabase_service.get_driver_stats(driver_id)
-#         
-#        if result['success']:
-#            return result['stats']
-#        else:
-#            print(f"Failed to get driver stats: {result['error']}")
-#            return None
-#         
-#    except Exception as e:
-#        print(f"Error getting driver stats: {str(e)}")
-#        return None
 
-#driver data collection (not in use due to missing sensor)
-def collect_driving_data(driver_id="demo_driver_001"):
+def get_or_create_driver(driver_id):
+    try:
+        driver = business_supabase_service.get_driver(driver_id)
+        if not driver:
+            new_driver = {
+                'driver_id': driver_id,
+                'created_at': datetime.now().isoformat(),
+                'total_trips': 0,
+                'total_driving_time': 0,
+                'event_history': {
+                    'sudden_acceleration_count': 0,
+                    'sudden_braking_count': 0,
+                    'sharp_turn_count': 0
+                }
+            }
+            result = business_supabase_service.create_driver(new_driver)
+            if result['success']:
+                print(f"Created new driver profile in business Supabase: {driver_id}")
+                return result['driver']
+            else:
+                print(f"Failed to create driver: {result['error']}")
+                return None
+        return driver
+    except Exception as e:
+        print(f"Error accessing driver database: {str(e)}")
+        return None
+
+
+def save_driver_data(driver_id, driving_data):
+    try:
+        session_data = {
+            'driver_id': driver_id,
+            'device_id': driving_data.get('device_id', 'unknown'),
+            'timestamp': driving_data.get('timestamp', datetime.now().isoformat()),
+            'speed': driving_data.get('speed', 0),
+            'location': driving_data.get('location', 'N/A'),
+            'sudden_acceleration_count': driving_data.get('sudden_acceleration_count', 0),
+            'sudden_braking_count': driving_data.get('sudden_braking_count', 0),
+            'sharp_turn_count': driving_data.get('sharp_turn_count', 0)
+        }
+        result = business_supabase_service.save_driving_session(session_data)
+        if result['success']:
+            print(f"Saved driving data to business Supabase for driver: {driver_id}")
+            return True
+        else:
+            print(f"Failed to save driver data: {result['error']}")
+            return False
+    except Exception as e:
+        print(f"Error saving driver data: {str(e)}")
+        return False
+
+
+def get_driver_stats(driver_id):
+    try:
+        result = business_supabase_service.get_driver_stats(driver_id)
+        if result['success']:
+            return result['stats']
+        else:
+            print(f"Failed to get driver stats: {result['error']}")
+            return None
+    except Exception as e:
+        print(f"Error getting driver stats: {str(e)}")
+        return None
+#URBAN PLANNING DATA ENDS HERE
+###############################################
+
+
+###############################################
+#COLLECTING DASHBOARD AND DRIVER ACCESSIBLE DRIVING DATA (FOR CLIENTS)
+def collect_driving_data(driver_id="demo_driver_001", device_id="unknown"):
+    import random
+    #generate random values for demo bc no sensor
     data = {
         'timestamp': datetime.now().isoformat(),
         'driver_id': driver_id,
-        'sudden_acceleration_count': 0,  #placeholder: count detected events in interval
-        'sudden_braking_count': 0,       #placeholder
-        'sharp_turn_count': 0,           #placeholder
-        'note': 'No sensor connected, using placeholder values.'
+        'device_id': device_id,
+        'speed': round(random.uniform(20, 120), 1),  #random speed between 20 and 120 km/h
+        'location': f"{round(random.uniform(37, 38), 6)}, {round(random.uniform(-122, -121), 6)}",  #random lat/lon
+        'sudden_acceleration_count': random.randint(0, 5),
+        'sudden_braking_count': random.randint(0, 5),
+        'sharp_turn_count': random.randint(0, 5),
+        'note': 'Randomly generated values for dashboard display.'
     }
-    
-    #save to business supabase 
-    #init_driver_database()
-    #save_driver_data(driver_id, data)
     return data
+#DASHBOARD AND DRIVER DATA ENDS HERE
+###############################################
 
 
 ###############################################
@@ -197,79 +195,6 @@ def collect_driving_data(driver_id="demo_driver_001"):
 #example use in main loop
 # init_driver_database() 
 # driving_data = collect_driving_data("driver_001")  #use real driver id here
-
-###############################################
-
-
-
-#local storage (on cam, but since raspberry pi, this part is not functional)
-
-#LOCAL_STORAGE_DIR = "/home/pi/dashcam_videos"  #local storage directory
-#MAX_LOCAL_STORAGE_GB = 10  #maximum local storage in GB
-#
-#def setup_local_storage():
-#    if not os.path.exists(LOCAL_STORAGE_DIR):
-#        os.makedirs(LOCAL_STORAGE_DIR)
-#        print(f"Created local storage directory: {LOCAL_STORAGE_DIR}")
-# 
-#def save_video_locally(video_path, crash_info):
-#    try:
-#        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-#        local_filename = f"backup_{timestamp}_{crash_info.get('device_id', 'unknown')}.avi"
-#        local_path = os.path.join(LOCAL_STORAGE_DIR, local_filename)
-#        
-#        import shutil
-#        shutil.copy2(video_path, local_path)
-#        print(f"Video backed up locally: {local_path}")
-#         
-#        #clean up old files
-#         cleanup_old_local_videos()
-#         
-#     except Exception as e:
-#         print(f"Local backup failed: {str(e)}")
-# 
-##delete old video 
-#def cleanup_old_local_videos():
-#    try:
-#        # Calculate current storage usage
-#        total_size = 0
-#        video_files = []
-#         
-#        for filename in os.listdir(LOCAL_STORAGE_DIR):
-#            if filename.endswith('.avi'):
-#                filepath = os.path.join(LOCAL_STORAGE_DIR, filename)
-#                file_size = os.path.getsize(filepath)
-#                total_size += file_size
-#                video_files.append((filepath, os.path.getmtime(filepath)))
-#         
-#        #convert to GB
-#        total_size_gb = total_size / (1024**3)
-#         
-#        #if storage > 80% full, delete oldest files
-#        if total_size_gb > (MAX_LOCAL_STORAGE_GB * 0.8):
-#            video_files.sort(key=lambda x: x[1])
-#             
-#            #delete oldest files until under 50% capacity
-#            for filepath, _ in video_files:
-#                if total_size_gb <= (MAX_LOCAL_STORAGE_GB * 0.5):
-#                    break
-#                 
-#                file_size = os.path.getsize(filepath)
-#                os.remove(filepath)
-#                total_size_gb -= file_size / (1024**3)
-#                print(f"Deleted old backup: {filepath}")
-#                 
-#    except Exception as e:
-#        print(f"Local cleanup failed: {str(e)}")
-#
-
-
-###############################################
-
-#example usage in main loop 
-#setup_local_storage()  
-#if video_filename:
-#    upload_service.add_crash_video(video_filename, recording_data)
 
 ###############################################
 
