@@ -78,18 +78,19 @@ function clearAllCrashes() {
 let currentCrashId = null;
 let currentCrashData = null;
 
-function openVideoModal(crashId, videoUrl) {
-    console.log('openVideoModal called with:', { crashId, videoUrl });
+function openVideoModal(cardNumber, crashId, videoUrl) {
+    console.log('openVideoModal called with:', { cardNumber, crashId, videoUrl });
     currentCrashId = crashId;
+    currentCrashData = null;
     
-    // Use the proxy URL to avoid CORS issues
+    //uses proxy url to avoid bad bad cors problems
     const fullVideoUrl = `/video/${videoUrl}`;
     console.log('Setting video source to:', fullVideoUrl);
     document.getElementById('modal-video-source').src = fullVideoUrl;
     document.getElementById('modal-video').load();
-    document.getElementById('modal-title').textContent = `Crash Report #${crashId}`;
+    document.getElementById('modal-title').textContent = `Crash Report #${cardNumber}`;
     
-    // Fetch crash data from server
+    //fetch data
     fetch(`/api/crashes`)
         .then(response => response.json())
         .then(crashes => {
@@ -111,51 +112,49 @@ function openVideoModal(crashId, videoUrl) {
 function populateModalDetails(crashData) {
     console.log('Populating modal details with:', crashData);
     const detailsDiv = document.getElementById('video-details');
-    
-    // Format crash data nicely
-    let crashDataHtml = '';
-    if (crashData.crash_data && typeof crashData.crash_data === 'object') {
-        const crashInfo = crashData.crash_data;
-        crashDataHtml = `
-            <div class="detail-row">
-                <span class="detail-label">Recording Interval:</span>
-                <span class="detail-value">${crashInfo.recording_interval || 'N/A'} seconds</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Buffer Seconds:</span>
-                <span class="detail-value">${crashInfo.buffer_seconds || 'N/A'} seconds</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Frame Rate:</span>
-                <span class="detail-value">${crashInfo.frame_rate || 'N/A'} fps</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Detection Type:</span>
-                <span class="detail-value">${crashInfo.detection_type || 'N/A'}</span>
-            </div>
-        `;
-    }
-    
+    const crashInfo = crashData.crash_data || {};
+
+    //FOR DEMO PURPOSE ONLY!!1!1!!1!
+
+    //randomly generates real life accel, speed, etc information for display (no sensor :((
+    const accel = crashInfo.acceleration || (Math.random() * (6 - 1) + 1).toFixed(2); // 1g to 6g
+    const speed = crashInfo.speed || (Math.random() * (120 - 20) + 20).toFixed(1); // 20 to 120 km/h
+    const lat = crashInfo.location_lat || (37 + Math.random()).toFixed(6); // Random lat
+    const lon = crashInfo.location_lon || (-122 + Math.random()).toFixed(6); // Random lon
+    const location = crashInfo.location || `${lat}, ${lon}`;
+    //end of random generator
+
     detailsDiv.innerHTML = `
         <div class="detail-row">
             <span class="detail-label">Device ID:</span>
-            <span class="detail-value">${crashData.device_id || 'Unknown'}</span>
+            <span class="detail-value">${crashData.device_id || 'N/A'}</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Status:</span>
+            <span class="detail-label">Video URL:</span>
             <span class="detail-value">
-                <span class="status-badge status-${crashData.status}">${crashData.status}</span>
+                ${(crashData.video_url) ? `<a href="${crashData.video_url}" target="_blank">${crashData.video_url}</a>` : (crashData.video_filename || 'N/A')}
             </span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Created:</span>
-            <span class="detail-value">${new Date(crashData.created_at).toLocaleString()}</span>
+            <span class="detail-label">Frame Rate:</span>
+            <span class="detail-value">${crashInfo.frame_rate || '30'} fps</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Video Filename:</span>
-            <span class="detail-value">${crashData.video_filename || 'N/A'}</span>
+            <span class="detail-label">Acceleration (g):</span>
+            <span class="detail-value">${accel}</span>
         </div>
-        ${crashDataHtml}
+        <div class="detail-row">
+            <span class="detail-label">Speed (km/h):</span>
+            <span class="detail-value">${speed}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Detection Type:</span>
+            <span class="detail-value">${crashInfo.detection_type || 'N/A'}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Location (GPS):</span>
+            <span class="detail-value">${location}</span>
+        </div>
     `;
 }
 
@@ -228,39 +227,114 @@ function deleteCrash() {
     }
 }
 
-function exportData() {
-    fetch('/api/crashes')
-        .then(response => response.json())
-        .then(data => {
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `all_crash_data_${new Date().getTime()}.json`;
-            link.click();
-        })
-        .catch(error => {
-            console.error('Error exporting data:', error);
-            alert('Error exporting data. Please try again.');
-        });
+let pendingDeleteCrashId = null;
+let confirmActionType = null;
+
+function showConfirmModal(actionType, id = null) {
+    confirmActionType = actionType;
+    pendingDeleteCrashId = id;
+    const modal = document.getElementById('confirmModal');
+    const title = document.getElementById('confirmModalTitle');
+    const message = document.getElementById('confirmModalMessage');
+    const confirmBtn = document.getElementById('confirmModalConfirmBtn');
+
+    if (actionType === 'delete') {
+        title.textContent = 'Delete Crash Report?';
+        message.textContent = 'Are you sure you want to delete this crash report? This action cannot be undone.';
+        confirmBtn.textContent = 'Delete';
+        confirmBtn.className = 'btn btn-danger';
+        confirmBtn.onclick = confirmDeleteCrash;
+    } else if (actionType === 'clearAll') {
+        title.textContent = 'Clear All Crash Reports?';
+        message.textContent = 'Are you sure you want to delete ALL crash reports? This action cannot be undone.';
+        confirmBtn.textContent = 'Clear All';
+        confirmBtn.className = 'btn btn-danger';
+        confirmBtn.onclick = confirmClearAllCrashes;
+    }
+    modal.style.display = 'block';
 }
 
-//close modal when click outside
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    pendingDeleteCrashId = null;
+    confirmActionType = null;
+}
+
+function deleteCrashById(crashId) {
+    showConfirmModal('delete', crashId);
+}
+
+function clearAllCrashes() {
+    showConfirmModal('clearAll');
+}
+
+function confirmDeleteCrash() {
+    if (!pendingDeleteCrashId) return closeConfirmModal();
+    fetch(`/api/crash/${pendingDeleteCrashId}/delete`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to delete crash'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting crash. Please try again.');
+    })
+    .finally(() => {
+        closeConfirmModal();
+    });
+}
+
+function confirmClearAllCrashes() {
+    fetch('/api/clear-all-crashes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to clear crashes'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error clearing crashes. Please try again.');
+    })
+    .finally(() => {
+        closeConfirmModal();
+    });
+}
+
+//closing modal
+
+//w/ click
 window.onclick = function(event) {
-    const modal = document.getElementById('videoModal');
+    const modal = document.getElementById('confirmModal');
     if (event.target === modal) {
-        closeVideoModal();
+        closeConfirmModal();
     }
 }
 
-//close modal with esc
+//w/ escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeVideoModal();
     }
 });
 
-//auto refresh if modal is not open every 30s
+//auto refresh
 setInterval(function() {
     if (!document.getElementById('videoModal').style.display || 
         document.getElementById('videoModal').style.display === 'none') {
@@ -272,7 +346,7 @@ setInterval(function() {
 document.addEventListener('DOMContentLoaded', function() {
     updateStats();
     
-    // Test video URLs to see if they're accessible
+    //test video url - outputs in console
     const videos = document.querySelectorAll('video source');
     videos.forEach((source, index) => {
         const url = source.src;

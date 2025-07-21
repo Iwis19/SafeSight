@@ -2,7 +2,7 @@
 
 #client (rasp pi)
 CLIENT_CONFIG = {
-    'server_url': 'http://10.24.22.66:5000',  #laptop ip addy
+    'server_url': 'http://localhost:5000',  #supposed to be ip addy if pi
     'api_key': None,  #api key if required
     'upload_retry_attempts': 3,
     'upload_retry_delay': 5,  #seconds

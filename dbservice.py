@@ -22,7 +22,7 @@ class SupabaseService:
             
             #get public url
             video_url = self.supabase.storage.from_(VIDEO_BUCKET).get_public_url(video_filename)
-            # Clean the URL by removing trailing question mark if present
+            #clean url by removing trailing question mark 
             if video_url.endswith('?'):
                 video_url = video_url[:-1]
             
@@ -55,7 +55,7 @@ class SupabaseService:
             print("DEBUG: Fetching crashes from Supabase...")
             result = self.supabase.table(CRASHES_TABLE)\
                 .select('*')\
-                .order('created_at', desc=True)\
+                .order('created_at', desc=False)\
                 .limit(limit)\
                 .execute()
             
@@ -65,7 +65,7 @@ class SupabaseService:
             crashes = []
             for crash in result.data:
                 crash['crash_data'] = json.loads(crash['crash_data']) if crash['crash_data'] else {}
-                # Clean video URL by removing trailing question mark if present
+                #get rid of stupid ? marks that ruin my program
                 if crash.get('video_url') and crash['video_url'].endswith('?'):
                     crash['video_url'] = crash['video_url'][:-1]
                 crashes.append(crash)
@@ -146,17 +146,17 @@ class SupabaseService:
     def reset_auto_increment(self) -> bool:
         try:
             print("DEBUG: Resetting auto-increment counter...")
-            # Execute SQL to reset the sequence
+            #sql to reset sequence
             sql = f"ALTER SEQUENCE {CRASHES_TABLE}_id_seq RESTART WITH 1;"
             result = self.supabase.rpc('exec_sql', {'sql': sql}).execute()
             print(f"DEBUG: Reset auto-increment result: {result}")
             return True
         except Exception as e:
             print(f"Supabase reset auto-increment error: {str(e)}")
-            # Try alternative method if RPC doesn't work
+            #alt methodk
             try:
                 print("DEBUG: Trying alternative reset method...")
-                # Insert and immediately delete a dummy record to reset counter
+                #insert and del dummy record for testing
                 dummy_data = {
                     'device_id': 'reset_counter',
                     'timestamp': datetime.now().isoformat(),

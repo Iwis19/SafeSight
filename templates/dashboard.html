@@ -44,17 +44,18 @@
             <h2 class="section-title">Recent Crash Footage</h2>
             <div class="crash-grid" id="crash-grid">
                 {% if crashes %}
-                    {% for crash in crashes %}
+                    {% for crash in crashes|reverse %}
                     <div class="crash-card {{ crash.status }}">
+                        <button class="crash-delete-btn" onclick="deleteCrashById({{ crash.id }})" title="Delete">&times;</button>
                         <div class="crash-header">
-                            <div class="crash-title">Crash Report #{{ crash.id }}</div>
+                            <div class="crash-title">Crash Report #{{ loop.revindex }}</div>
                             <div class="crash-meta">
                                 Device: {{ crash.device_id }} | {{ crash.timestamp }}
                             </div>
                             <span class="status-badge status-{{ crash.status }}">{{ crash.status }}</span>
                         </div>
                         <div class="crash-video">
-                            <video controls onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})" 
+                            <video controls onclick="openVideoModal({{ loop.revindex }}, {{ crash.id }}, '{{ crash.video_filename }}', {{ crash | tojson }})" 
                                    onerror="console.error('Video error for {{ crash.video_filename }}:', this.error);"
                                    onloadstart="console.log('Loading video: {{ crash.video_filename }}');"
                                    oncanplay="console.log('Video can play: {{ crash.video_filename }}');">
@@ -63,7 +64,7 @@
                             </video>
                         </div>
                         <div class="crash-actions">
-                            <button class="btn btn-primary" onclick="openVideoModal({{ crash.id }}, '{{ crash.video_filename }}')">View Details</button>
+                            <button class="btn btn-primary" onclick="openVideoModal({{ loop.revindex }}, {{ crash.id }}, '{{ crash.video_filename }}')">View Details</button>
                             <button class="btn btn-warning" onclick="markUrgent({{ crash.id }})">Urgent</button>
                             <button class="btn btn-success" onclick="markReviewed({{ crash.id }})">Reviewed</button>
                         </div>
@@ -101,7 +102,18 @@
                 <button class="btn btn-warning" onclick="markUrgentModal()">Mark Urgent</button>
                 <button class="btn btn-success" onclick="markReviewedModal()">Mark Reviewed</button>
                 <button class="btn btn-export" onclick="exportCrashData()">Export Data</button>
-                <button class="btn btn-delete" onclick="deleteCrash()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- confirmation modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal-content">
+            <h3 id="confirmModalTitle">Are you sure?</h3>
+            <p id="confirmModalMessage">Are you sure you want to proceed?</p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px;">
+                <button id="confirmModalConfirmBtn" class="btn btn-danger">Confirm</button>
+                <button class="btn btn-primary" onclick="closeConfirmModal()">Cancel</button>
             </div>
         </div>
     </div>

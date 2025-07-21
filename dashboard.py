@@ -21,7 +21,7 @@ def dashboard():
         print("  ---")
     
     response = make_response(render_template('dashboard.html', crashes=crashes))
-    # Add cache-busting headers
+    #cache-busting headers
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
@@ -94,7 +94,7 @@ def upload_crash():
 def get_crashes():
     crashes = supabase_service.get_crashes()
     response = jsonify(crashes)
-    # Add cache-busting headers
+    #cache-busting headers
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
@@ -116,8 +116,9 @@ def update_crash_status(crash_id):
         return jsonify({'error': 'Failed to update status'}), 500
 
 @app.route('/api/clear-all-crashes', methods=['POST'])
+
+#clear all from db
 def clear_all_crashes():
-    """Clear all crashes from the database"""
     try:
         success = supabase_service.clear_all_crashes()
         if success:
@@ -129,8 +130,9 @@ def clear_all_crashes():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/crash/<int:crash_id>/delete', methods=['DELETE'])
+
+#delete crash by id - doesnt change crash #
 def delete_crash(crash_id):
-    """Delete a specific crash by ID"""
     try:
         success = supabase_service.delete_crash(crash_id)
         if success:
@@ -149,13 +151,14 @@ def get_stats():
     return jsonify(stats)
 
 @app.route('/debug/bucket')
+
+#debug endpoint to see supabase bucket
 def debug_bucket():
-    """Debug endpoint to check what's in the Supabase bucket"""
     try:
         from dbconfig import get_supabase_client, VIDEO_BUCKET
         supabase = get_supabase_client()
         
-        # List files in the bucket
+        #list files in bucket
         files = supabase.storage.from_(VIDEO_BUCKET).list()
         
         result = {
@@ -176,16 +179,17 @@ def debug_bucket():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/debug/test-video-creation')
+
+#test endpoints 
 def test_video_creation():
-    """Test endpoint to create a simple test video using MoviePy"""
     try:
         from video_recorder import VideoRecorder
         import os
         
-        # Create video recorder
+        #vid recorder
         recorder = VideoRecorder('crash_videos', 640, 480, 10)
         
-        # Create test video
+        #test vid creator
         video_path = recorder.create_test_video(duration=5)
         
         if video_path and os.path.exists(video_path):
@@ -206,8 +210,9 @@ def test_video_creation():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/video/<filename>')
+
+#serve vids from supabase avoidin cors bad problems
 def proxy_video(filename):
-    """Proxy endpoint to serve videos from Supabase without CORS issues"""
     try:
         from dbconfig import get_supabase_client, VIDEO_BUCKET
         from flask import Response
@@ -215,22 +220,22 @@ def proxy_video(filename):
         
         supabase = get_supabase_client()
         
-        # Get the video URL
+        #get vid url
         video_url = supabase.storage.from_(VIDEO_BUCKET).get_public_url(filename)
         if video_url.endswith('?'):
             video_url = video_url[:-1]
         
-        # Fetch the video content
+        #get vid content
         response = requests.get(video_url)
         
         if response.status_code == 200:
-            # Determine MIME type based on file extension
+            #determine mime type
             if filename.lower().endswith('.mp4'):
                 mimetype = 'video/mp4'
             else:
                 mimetype = 'video/x-msvideo'
             
-            # Return with proper headers
+            #return w proper headers
             return Response(
                 response.content,
                 mimetype=mimetype,
@@ -248,11 +253,13 @@ def proxy_video(filename):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/static/crash_videos/<filename>')
+
+#serve vid files from vid folder
 def serve_video(filename):
-    """Serve video files from crash_videos directory"""
     from flask import send_from_directory
     import os
-    # Get the absolute path to the crash_videos directory
+
+    #abs path
     crash_videos_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'crash_videos')
     return send_from_directory(crash_videos_path, filename)
 

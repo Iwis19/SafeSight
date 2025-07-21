@@ -1,7 +1,7 @@
 import cv2
 import time 
 from collections import deque
-# from mpu6050 import mpu6050  #no mpu6050 sensor :(
+#from mpu6050 import mpu6050  #no mpu6050 sensor :(
 import numpy as np
 from datetime import datetime
 from upload_service import upload_service
@@ -11,7 +11,7 @@ import json
 import select
 import sys
 
-# Constants
+#const
 BUFFER_SECONDS = 300  #5 minute buffer time
 FRAME_RATE = 10
 RECORDING_INTERVAL = 30  #save "crash" video every x seconds since we do not have a sensor to properly detect crash
