@@ -12,8 +12,8 @@ import select
 import sys
 
 #const
-BUFFER_SECONDS = 300  #5 minute buffer time
-FRAME_RATE = 10
+BUFFER_SECONDS = 120  #2 minute buffer time
+FRAME_RATE = 10 
 RECORDING_INTERVAL = 30  #save "crash" video every x seconds to mimic crash
 
 ###############################################################

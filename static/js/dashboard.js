@@ -197,11 +197,26 @@ function downloadVideo() {
 
 function exportCrashData() {
     if (currentCrashData) {
-        const dataStr = JSON.stringify(currentCrashData, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const crashInfo = currentCrashData.crash_data || {};
+        const formattedData = `
+Crash Report #${currentCrashId}
+------------------------------
+Driver ID: ${crashInfo.driver_id || 'N/A'}
+Device ID: ${currentCrashData.device_id || 'N/A'}
+Video URL: ${currentCrashData.video_url || currentCrashData.video_filename || 'N/A'}
+Frame Rate: ${crashInfo.frame_rate || '30'} fps
+Acceleration (g): ${crashInfo.acceleration || 'N/A'}
+Speed (km/h): ${crashInfo.speed || 'N/A'}
+Detection Type: ${crashInfo.detection_type || 'N/A'}
+Location (GPS): ${crashInfo.location || `${crashInfo.location_lat || 'N/A'}, ${crashInfo.location_lon || 'N/A'}`}
+Created At: ${currentCrashData.created_at || 'N/A'}
+Status: ${currentCrashData.status || 'N/A'}
+        `;
+
+        const dataBlob = new Blob([formattedData], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
-        link.download = `crash_data_${currentCrashId}.json`;
+        link.download = `crash_report_${currentCrashId}.txt`;
         link.click();
     }
 }
@@ -323,18 +338,35 @@ function confirmClearAllCrashes() {
 
 //closing modal
 
-//w/ click
+// click
 window.onclick = function(event) {
-    const modal = document.getElementById('confirmModal');
-    if (event.target === modal) {
+    const confirmModal = document.getElementById('confirmModal');
+    const videoModal = document.getElementById('videoModal');
+    //close confirm modal if click outside its content
+    if (confirmModal && event.target === confirmModal) {
         closeConfirmModal();
+    }
+    //close video modal if click outside its content
+    if (videoModal && event.target === videoModal) {
+        closeVideoModal();
     }
 }
 
-//w/ escape
+// escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
-        closeVideoModal();
+        const confirmModal = document.getElementById('confirmModal');
+        const videoModal = document.getElementById('videoModal');
+
+        //close confirm modal if open
+        if (confirmModal && confirmModal.style.display === 'block') {
+            closeConfirmModal();
+        }
+
+        //close video modal if open
+        if (videoModal && videoModal.style.display === 'block') {
+            closeVideoModal();
+        }
     }
 });
 
@@ -364,4 +396,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error(`Video ${index + 1} fetch error:`, error);
             });
     });
-}); 
+});

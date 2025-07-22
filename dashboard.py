@@ -49,7 +49,7 @@ def upload_crash():
         crash_data_str = request.form.get('crash_data', '{}')
         device_id = request.form.get('device_id', 'unknown')
         
-        #parse crash_data if it's a JSON string
+        #parse crash_data if its a JSON string
         try:
             crash_data = json.loads(crash_data_str) if crash_data_str else {}
         except json.JSONDecodeError:
