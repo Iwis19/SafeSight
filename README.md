@@ -34,7 +34,7 @@ Crash detection and reporting system that automatically captures and uploads cra
 - **OpenCV**
 - **MoviePy**
 - **Supabase**
-- NumPy, Requests
+- **NumPy, Requests**
 
 ---
 
