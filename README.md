@@ -57,12 +57,16 @@ SafeSight-master/
     └── images/
 ```
 
+---
+
 ## Lessons Learned
 - Designing with heavily constrained hardware
 - Managing rolling buffers
 - Integrating REST APIs with cloud storage
 - How to use Flask
 - How to not collapse while debugging under the very short amount of time given
+
+---
 
 ## License
 MIT
